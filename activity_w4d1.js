@@ -3,7 +3,7 @@
 const tokens = {
     customer:   { max_free_hours: 2, hourly_fee: 3   },
     staff:      { max_free_hours: 6, hourly_fee: 1   },
-    manager:    { max_free_hours: 10,hourly_fee: 0   },
+    manager:    { max_free_hours: 10,hourly_fee: 0.5 },
     promo:      { max_free_hours: 0, hourly_fee: 0.2 },
 };
 
@@ -47,12 +47,18 @@ class CarExtra extends Car{
         super(carReg, arrival);
 
         this._token      = tokens[thisToken];
+        let tokenType    = thisToken;
         // finds if the car is a staff's and get it;s token
-        staffRecord.forEach( ox => { if(ox.car_reg == carReg ) this._token = tokens[ox.type]; } );
+        staffRecord.forEach( ox => { 
+                if(ox.car_reg == carReg ) {
+                    this._token = tokens[ox.type]; 
+                    tokenType = ox.type;
+                } 
+            });
         this._hourlyFee  = this._token.hourly_fee;
         this._freeTime   = this._token.max_free_hours;
         // notify entry to car park
-        this.sendMessage(`New car to car park: ${carReg} [${this._token.keys()}]`)
+        this.sendMessage(`New car to car park: ${carReg} [${tokenType}]`);
     }
     // have to take into account free time as well, then redirect to super
     leavingCarPark(departure){
@@ -81,18 +87,18 @@ if(parkingFee>0) newCar.debitCustomer();
 
 console.log('\n~~~ the new extended class');
 
-console.log('\n> staff arrives at 8 and leaves at 16');
+console.log('\n> staff arrives at 8 and leaves at 16 = 8h');
 let carStaff    = new CarExtra('ASD456FG','8');  // staff arrives at 8
 carStaff.leavingCarPark(16);                     // leaves at 16 (after 8 hours)
 
-console.log('\n> manager arrives at 8 and leaves at 17');
+console.log('\n> manager arrives at 9 and leaves at 17 = 8h');
 let carManager  = new CarExtra('IOP321YU',9);    // manager arrives at 9
 carManager.leavingCarPark(17);                   // leaves at 17, after 8 hours
 
-console.log('\n> customer arrives at 12 and leaves at 16');
-let carCust  = new CarExtra('IOP321YU',12);
+console.log('\n> customer arrives at 12 and leaves at 16 = 4h');
+let carCust  = new CarExtra('GH45FD',12);
 carCust.leavingCarPark(16);
 
-console.log('\n> customer with promotion, arrives at 10 and leaves at 18');
-let carCustOffer  = new CarExtra('IOP321YU',10,'promo');
+console.log('\n> customer with promotion, arrives at 10 and leaves at 18 = 8h');
+let carCustOffer  = new CarExtra('KCO44ER',10,'promo');
 carCustOffer.leavingCarPark(18);
